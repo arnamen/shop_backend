@@ -12,13 +12,13 @@ const DUMMY_USERS = [
     }
 ]
 
-router.get('/:uid', (req, res, next) => {
-    const uid = req.params.uid;
-    const requestedUser = DUMMY_USERS.find(user => user.id === uid);
+router.get('/:id', (req, res, next) => {
+    const id = req.params.id;
+    const requestedUser = DUMMY_USERS.find(user => user.id === id);
     res.json(requestedUser);
 });
 
-router.get('', (req,res, next) => {
+router.get('/', (req,res, next) => {
     res.json(DUMMY_USERS);
 });
 
@@ -30,7 +30,7 @@ router.post('/login', (req,res, next) => {
     
 });
 
-router.patch('/:uid', (req,res, next) => {
+router.patch('/:id', (req,res, next) => {
     
 });
 
