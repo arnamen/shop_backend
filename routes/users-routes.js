@@ -1,6 +1,7 @@
 const express = require('express');
-
 const router = express.Router();
+
+const HttpError = require('../models/http-error');
 
 const DUMMY_USERS = [
     {
@@ -16,8 +17,7 @@ router.get('/:id', (req, res, next) => {
     const id = req.params.id;
     const requestedUser = DUMMY_USERS.find(user => user.id === id);
     if(!requestedUser) {
-        const error = new Error('could not find user with provided id.');
-        error.code = 404;
+        const error = new HttpError('could not find user with provided id.', 404);
         next(error);
     }
     res.json(requestedUser);
@@ -39,8 +39,7 @@ router.patch('/:id', (req,res, next) => {
     const id = req.params.id;
     const userToUpdate = DUMMY_USERS.find(user => user.id === id);
     if(!userToUpdate) {
-        const error = new Error('could not find user with provided id.');
-        error.code = 404;
+        const error = new HttpError('could not find user with provided id.');
         next(error);
     }
     res.json(userForUpdate);

@@ -3,6 +3,8 @@ const atob = require('atob');
 const btoa = require('btoa');
 const router = express.Router();
 
+const HttpError = require('../models/http-error');
+
 const DUMMY_ITEMS = [
     {
         id: '1',
@@ -17,8 +19,7 @@ router.get('/:id', (req, res, next) => {
     const id = req.params.id;
     const requestedItem = DUMMY_ITEMS.find(item => item.id === id);
     if(!requestedItem) {
-        const error = new Error('could not find item with provided id.');
-        error.code = 404;
+        const error = new HttpError('could not find item with provided id.', 404);
         next(error);
     }
     res.json(requestedItem);
@@ -38,8 +39,7 @@ router.patch('/:id', (req,res, next) => {
     const id = req.params.id;
     const itemToUpdate = DUMMY_ITEMS.find(item => item.id === id);
     if(!itemToUpdate) {
-        const error = new Error('could not find item with provided id.');
-        error.code = 404;
+        const error = new HttpError('could not find item with provided id.', 404);
         next(error);
     }
     res.json(itemToUpdate);
@@ -49,8 +49,7 @@ router.delete('/:id', (req,res, next) => {
     const id = req.params.id;
     const itemToDelete = DUMMY_ITEMS.find(item => item.id === id);
     if(!itemToDelete) {
-        const error = new Error('could not find item with provided id.');
-        error.code = 404;
+        const error = new HttpError('could not find item with provided id.', 404);
         next(error);
     }
     res.json(itemToDelete);
