@@ -65,13 +65,6 @@ const loginUser = (req,res, next) => {
 
 const updateUser = (req,res, next) => {
     res.status(500).json({message: 'This feature is in development'});
-    /* const id = req.params.id;
-    const userToUpdate = DUMMY_USERS.find(user => user.id === id);
-    if(!userToUpdate) {
-        const error = new HttpError('could not find user with provided id.');
-        next(error);
-    }
-    res.json(userForUpdate); */
 };
 
 exports.getUserById = getUserById;
