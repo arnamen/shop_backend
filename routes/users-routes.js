@@ -1,48 +1,16 @@
 const express = require('express');
 const router = express.Router();
 
-const HttpError = require('../models/http-error');
+const { getUserById, getAllUsers, createUser, loginUser, updateUser } = require('../controllers/users-controller');
 
-const DUMMY_USERS = [
-    {
-        id: '1',
-        name: 'n1'
-    },{
-        id: '2',
-        name: 'n2'
-    }
-]
+router.get('/:id', getUserById);
 
-router.get('/:id', (req, res, next) => {
-    const id = req.params.id;
-    const requestedUser = DUMMY_USERS.find(user => user.id === id);
-    if(!requestedUser) {
-        const error = new HttpError('could not find user with provided id.', 404);
-        next(error);
-    }
-    res.json(requestedUser);
-});
+router.get('/', getAllUsers);
 
-router.get('/', (req,res, next) => {
-    res.json(DUMMY_USERS);
-});
+router.post('/signup', createUser);
 
-router.post('/signup', (req,res, next) => {
-    
-});
+router.post('/login', loginUser);
 
-router.post('/login', (req,res, next) => {
-    
-});
-
-router.patch('/:id', (req,res, next) => {
-    const id = req.params.id;
-    const userToUpdate = DUMMY_USERS.find(user => user.id === id);
-    if(!userToUpdate) {
-        const error = new HttpError('could not find user with provided id.');
-        next(error);
-    }
-    res.json(userForUpdate);
-});
+router.patch('/:id', updateUser);
 
 module.exports = router;
