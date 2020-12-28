@@ -37,8 +37,8 @@ router.post('/login', (req,res, next) => {
 
 router.patch('/:id', (req,res, next) => {
     const id = req.params.id;
-    const userForUpdate = DUMMY_USERS.find(user => user.id === id);
-    if(!userForUpdate) {
+    const userToUpdate = DUMMY_USERS.find(user => user.id === id);
+    if(!userToUpdate) {
         const error = new Error('could not find user with provided id.');
         error.code = 404;
         next(error);

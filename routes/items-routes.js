@@ -16,6 +16,11 @@ const DUMMY_ITEMS = [
 router.get('/:id', (req, res, next) => {
     const id = req.params.id;
     const requestedItem = DUMMY_ITEMS.find(item => item.id === id);
+    if(!requestedItem) {
+        const error = new Error('could not find item with provided id.');
+        error.code = 404;
+        next(error);
+    }
     res.json(requestedItem);
 });
 
@@ -30,11 +35,25 @@ router.post('/', (req,res, next) => {
 });
 
 router.patch('/:id', (req,res, next) => {
-    
+    const id = req.params.id;
+    const itemToUpdate = DUMMY_ITEMS.find(item => item.id === id);
+    if(!itemToUpdate) {
+        const error = new Error('could not find item with provided id.');
+        error.code = 404;
+        next(error);
+    }
+    res.json(itemToUpdate);
 });
 
 router.delete('/:id', (req,res, next) => {
-    
+    const id = req.params.id;
+    const itemToDelete = DUMMY_ITEMS.find(item => item.id === id);
+    if(!itemToDelete) {
+        const error = new Error('could not find item with provided id.');
+        error.code = 404;
+        next(error);
+    }
+    res.json(itemToDelete);
 });
 
 module.exports = router;
