@@ -1,12 +1,11 @@
 const express = require('express');
-const bodyParse = require('body-parser');
 
 const HttpError = require('./models/http-error');
 const usersRoutes = require('./routes/users-routes');
 const itemsRoutes = require('./routes/items-routes');
 
 const app = express();
-
+app.use(express.json());
 app.use('/api/users', usersRoutes);
 app.use('/api/items', itemsRoutes);
 
