@@ -6,18 +6,23 @@ const User = require('../models/User');
 
 const HttpError = require('../models/http-error');
 
-const getUserById = (req, res, next) => {
+const getUserById = async (req, res, next) => {
     const id = req.params.id;
-    const requestedUser = DUMMY_USERS.find(user => user.id === id);
+    try {
+        const requestedUser = await User.findOne({_id: id});
     if(!requestedUser) {
         const error = new HttpError('could not find user with provided id.', 404);
+        return next(error);
+    }
+    res.json({name: requestedUser.name, id: requestedUser.id});
+    } catch (error) {
         next(error);
     }
-    res.json(requestedUser);
 };
 
-const getAllUsers = (req,res, next) => {
-    res.json(DUMMY_USERS);
+const getAllUsers = async (req,res, next) => {
+    const users = (await User.find()).map(user => {return {name: user.name, id: user.id}});
+    res.json(users);
 };
 
 const createUser = async (req, res, next) => {
@@ -74,8 +79,22 @@ const loginUser = async (req,res, next) => {
 
 };
 
-const updateUser = (req,res, next) => {
-    res.status(500).json({message: 'This feature is in development'});
+const updateUser = async (req,res, next) => {
+    const id = req.params.id;
+    const {name, password} = req.body;
+    try {
+        const hashedPassword = bcrypt.hashSync(password,12);
+        const requestedUser = await User.findOne({_id: id});
+    if(!requestedUser) {
+        const error = new HttpError('could not find user with provided id.', 404);
+        return next(error);
+    }
+    await User.updateOne({_id: id}, {name: name || requestedUser.name, password: hashedPassword || requestedUser.password});
+
+    res.json({name: requestedUser.name, id: requestedUser.id});
+    } catch (error) {
+        next(error);
+    }
 };
 
 exports.getUserById = getUserById;
