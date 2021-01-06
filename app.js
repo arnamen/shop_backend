@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 
 const HttpError = require('./models/http-error');
 const usersRoutes = require('./routes/users-routes');
@@ -15,8 +16,18 @@ app.use((req, res, next) => {
 });
 
 app.use((error, req, res, next) => {
-    if(res.headerSent) return next(error);
-    res.status(error.code || 500).json({message: error.message || 'An unknown error occured'});
+    if (res.headerSent) return next(error);
+    res.status(error.code || 500).json({ message: error.message || 'An unknown error occured' });
 });
 
-app.listen(5000);
+mongoose
+    .connect(
+        `mongodb+srv://root:1325467a@cluster0.xesan.mongodb.net/<dbname>?retryWrites=true&w=majority`, 
+        { useNewUrlParser: true, useUnifiedTopology: true }
+    )
+    .then(() => {
+        app.listen(5000);
+    })
+    .catch(err => {
+        console.log(err);
+    });
