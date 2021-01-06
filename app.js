@@ -22,7 +22,7 @@ app.use((error, req, res, next) => {
 
 mongoose
     .connect(
-        `mongodb+srv://root:1325467a@cluster0.xesan.mongodb.net/<dbname>?retryWrites=true&w=majority`, 
+        `mongodb+srv://root:1325467a@cluster0.xesan.mongodb.net/drawerShopDB?retryWrites=true&w=majority`, 
         { useNewUrlParser: true, useUnifiedTopology: true }
     )
     .then(() => {
