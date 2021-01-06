@@ -44,25 +44,33 @@ const createUser = async (req, res, next) => {
         return next(new HttpError('Signing up failed, please try again later.'), 500);
     }
 
-    console.log(createdUser);
-
     res.status(201).json({
-        message: `User ${name} was successfully created`,
-        userData: createdUser,
         token
     });
 
 };
 
-const loginUser = (req,res, next) => {
+const loginUser = async (req,res, next) => {
 
     const {email, password} = req.body;
     if(!email || !password) next(new HttpError('Incorrect login data'), 400);
 
-    const userData = DUMMY_USERS.find(user => user.email === email && user.password === password);
-    if(!userData) return next(new HttpError('Incorrect login data'), 400);
+    let token;
+    let createdUser;
+    try {
+        const userData = await User.findOne({email: email});
+        const userPassword = userData.password;
+        const isPasswordValid = bcrypt.compareSync(password, userPassword);
+        if(!isPasswordValid) return next(new HttpError('Incorrect login data'), 400);
+    
+        token = jwt.sign({userId: userData.id, email: userData.email}, "root", {expiresIn: '1d'});
 
-    res.status(200).json(userData);
+    } catch (error) {
+        console.log(error);
+        return next(new HttpError('Signing up failed, please try again later.'), 500);
+    }
+
+    res.status(200).json({token: token});
 
 };
 
