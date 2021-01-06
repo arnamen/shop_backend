@@ -23,7 +23,7 @@ const getAllUsers = (req,res, next) => {
 const createUser = async (req, res, next) => {
 
     const {email,  password, name} = req.body;
-    if(!email || !password || !name) next(new HttpError('Incorrect user registration data'), 400);
+    if(!email || !password || !name) next(new HttpError('Incorrect user registration data', 400));
     let token;
     let createdUser;
     try {
@@ -31,8 +31,8 @@ const createUser = async (req, res, next) => {
 
         const emailAlreadyExist = (await User.find({email: email})).length !== 0;
         const nameAlreadyExist = (await User.find({name: name})).length !== 0;
-        if(emailAlreadyExist) return next(new HttpError('User with the same email already exist'), 400);
-        if(nameAlreadyExist) return next(new HttpError('User with the same name already exist'), 400);
+        if(emailAlreadyExist) return next(new HttpError('User with the same email already exist', 400));
+        if(nameAlreadyExist) return next(new HttpError('User with the same name already exist', 400));
     
         createdUser = new User({email, password: hashedPassword, name});
         await createdUser.save();
@@ -41,7 +41,7 @@ const createUser = async (req, res, next) => {
 
     } catch (error) {
         console.log(error);
-        return next(new HttpError('Signing up failed, please try again later.'), 500);
+        return next(new HttpError('Signing up failed, please try again later.', 500));
     }
 
     res.status(201).json({
@@ -53,21 +53,21 @@ const createUser = async (req, res, next) => {
 const loginUser = async (req,res, next) => {
 
     const {email, password} = req.body;
-    if(!email || !password) next(new HttpError('Incorrect login data'), 400);
+    if(!email || !password) next(new HttpError('Incorrect login data', 400));
 
     let token;
-    let createdUser;
+
     try {
         const userData = await User.findOne({email: email});
         const userPassword = userData.password;
         const isPasswordValid = bcrypt.compareSync(password, userPassword);
-        if(!isPasswordValid) return next(new HttpError('Incorrect login data'), 400);
+        if(!isPasswordValid) return next(new HttpError('Incorrect login data', 400));
     
         token = jwt.sign({userId: userData.id, email: userData.email}, "root", {expiresIn: '1d'});
 
     } catch (error) {
         console.log(error);
-        return next(new HttpError('Signing up failed, please try again later.'), 500);
+        return next(new HttpError('Signing up failed, please try again later.', 500));
     }
 
     res.status(200).json({token: token});
