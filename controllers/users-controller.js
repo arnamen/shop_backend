@@ -50,6 +50,7 @@ const createUser = async (req, res, next) => {
     }
 
     res.status(201).json({
+        id: createdUser.id,
         token
     });
 
@@ -83,7 +84,7 @@ const updateUser = async (req,res, next) => {
     const id = req.params.id;
     const {name, password} = req.body;
     try {
-        const hashedPassword = bcrypt.hashSync(password,12);
+        const hashedPassword = password ? bcrypt.hashSync(password,12) : null;
         const requestedUser = await User.findOne({_id: id});
     if(!requestedUser) {
         const error = new HttpError('could not find user with provided id.', 404);
@@ -91,7 +92,7 @@ const updateUser = async (req,res, next) => {
     }
     await User.updateOne({_id: id}, {name: name || requestedUser.name, password: hashedPassword || requestedUser.password});
 
-    res.json({name: requestedUser.name, id: requestedUser.id});
+    res.json({message: "Updated successfully"});
     } catch (error) {
         next(error);
     }
