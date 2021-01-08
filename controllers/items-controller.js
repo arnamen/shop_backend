@@ -19,14 +19,18 @@ const addItem = async (req,res, next) => {
     
 }
 
-const getItemById = (req, res, next) => {
+const getItemById = async (req, res, next) => {
+
     const id = req.params.id;
-    const requestedItem = DUMMY_ITEMS.find(item => item.id === id);
-    if(!requestedItem) {
+
+    try {
+        const requestedItem = await Item.find({_id: id});
+        res.json(requestedItem);
+    } catch (e) {
         const error = new HttpError('Could not find item with provided id.', 404);
         next(error);
     }
-    res.json(requestedItem);
+
 };
 
 const getAllItems = (req,res, next) => {
