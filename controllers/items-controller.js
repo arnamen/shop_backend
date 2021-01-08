@@ -1,7 +1,6 @@
-const Item = require('../models/Item');
-
 const ObjectId = require('mongoose').Types.ObjectId;
 
+const Item = require('../models/Item');
 const HttpError = require('../models/http-error');
 
 const addItem = async (req, res, next) => {
@@ -46,6 +45,7 @@ const getItems = async (req, res, next) => {
 };
 
 const updateItem = async (req, res, next) => {
+    console.log(req.files);
     const id = req.params.id;
     const itemData = req.body;
     const { name, description, categories, tags, inStock, price, oldPrice, stars, images = null, labels, reviews = null } = itemData;
@@ -60,7 +60,7 @@ const updateItem = async (req, res, next) => {
 
             itemToUpdate.name = name || itemToUpdate.name;
             itemToUpdate.description = description || itemToUpdate.description;
-            itemToUpdate.categories = categories || itemData.categories;
+            itemToUpdate.categories = categories || itemToUpdate.categories;
             itemToUpdate.tags = tags || itemToUpdate.tags;
             itemToUpdate.inStock = inStock || itemToUpdate.inStock;
             itemToUpdate.price = price || itemToUpdate.price;
@@ -71,7 +71,7 @@ const updateItem = async (req, res, next) => {
             itemToUpdate.reviews = reviews || itemToUpdate.reviews;
 
         const updatedItem = await itemToUpdate.save();
-        res.json(updatedItem);
+        return res.json(updatedItem);
     } catch (e) {
         console.log(e);
         const error = new HttpError('Failed to update item with provided id.', 400);
