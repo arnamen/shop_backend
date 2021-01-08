@@ -80,15 +80,21 @@ const updateItem = async (req, res, next) => {
 
 };
 
-const deleteItem = (req, res, next) => {
+const deleteItem = async (req, res, next) => {
+
     const id = req.params.id;
-    const itemToDelete = DUMMY_ITEMS.find(item => item.id === id);
-    if (!itemToDelete) {
-        const error = new HttpError('could not find item with provided id.', 404);
-        next(error);
+    let result;
+
+    try {
+        result = await Item.deleteOne({_id: id});
+    } catch (e) {
+        console.log(e);
+        const error = new HttpError('Failed to delete item with provided id.', 400);
+        return next(error);
     }
-    DUMMY_ITEMS = DUMMY_ITEMS.filter(item => item.id !== id);
-    res.json({ message: 'deleted successfully', itemToDelete });
+
+
+    res.json(result);
 };
 
 exports.getItemById = getItemById;
