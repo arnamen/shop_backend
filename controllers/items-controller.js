@@ -1,56 +1,33 @@
+const Item = require('../models/Item');
 
-const { json } = require('body-parser');
+const ObjectId = require('mongoose').Types.ObjectId;
+
 const HttpError = require('../models/http-error');
 
-let DUMMY_ITEMS = [
-    {
-        name:  'dymmy_item1',
-        categories: ['dummycat-1', 'dummycat-2'],
-        tags: {
-            tag1: 'tag1val',
-            tag2: 'tag2val'
-        },
-        description: 'some description',
-        inStock: true,
-        price: 1500,
-        oldPrice: 2000,
-        images: null,
-        stars: 0,
-        labels: ['new', 'popular'],
-        id: 'dymmy_item1'
-    },{
-        name:  'dymmy_item2',
-        categories: ['dummycat-11', 'dummycat-22'],
-        tags: {
-            tag1: 'tag1val',
-            tag2: 'tag2val'
-        },
-        description: 'some description222',
-        inStock: false,
-        price: 2000,
-        images: null,
-        stars: 0,
-        labels: ['popular'],
-        id: 'dymmy_item2'
+const addItem = async (req,res, next) => {
+    const itemData = req.body;
+    const {name = "", description, categories, tags, inStock, price, oldPrice, stars, images = null, labels, reviews = null} = itemData;
+    const itemId = name.replace(/\\<|\>|\:|\"|\/|\\|\||\?|\*|\!/,'.'); //remove path-restricted symbols from id
+    try {
+        const createdItem = new Item({...itemData, _id: itemId + '_' + ObjectId()});
+        const saveditem = await createdItem.save();
+        res.status(201).json({id: saveditem._id});
+    } catch (error) {
+        console.log(error);
+        next(new HttpError("Unable to create item with provided data", 400));
     }
-];
+    
+}
 
 const getItemById = (req, res, next) => {
     const id = req.params.id;
     const requestedItem = DUMMY_ITEMS.find(item => item.id === id);
     if(!requestedItem) {
-        const error = new HttpError('could not find item with provided id.', 404);
+        const error = new HttpError('Could not find item with provided id.', 404);
         next(error);
     }
     res.json(requestedItem);
 };
-
-const addItem = (req,res, next) => {
-    //{name, categories, tags, description, inStock, price, oldPrice, images = null, stars = 0, labels}
-    const itemData = req.body;
-    DUMMY_ITEMS.push(itemData);
-    res.status(201).json({message: 'item created', itemData});
-}
 
 const getAllItems = (req,res, next) => {
     res.json(DUMMY_ITEMS);

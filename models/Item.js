@@ -19,6 +19,7 @@ const itemchema = new Schema({
             review: { type: String, required: true }
         }]
     },
+    _id: {type: String, required: true}
 });
 
 module.exports = mongoose.model('Item', itemchema);
