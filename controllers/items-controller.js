@@ -33,8 +33,16 @@ const getItemById = async (req, res, next) => {
 
 };
 
-const getAllItems = (req,res, next) => {
-    res.json(DUMMY_ITEMS);
+const getItems = async (req,res, next) => {
+    const skip = req.query.skip || 0;
+    const perPage = req.query.perPage || 5;
+    try {
+        const requestedItem = await Item.find().skip(skip).limit(perPage);
+        res.json(requestedItem);
+    } catch (e) {
+        const error = new HttpError('Could not find item with provided id.', 404);
+        next(error);
+    }
 };
 
 const updateItem = (req,res, next) => {
@@ -59,7 +67,7 @@ const deleteItem = (req,res, next) => {
 };
 
 exports.getItemById = getItemById;
-exports.getAllItems = getAllItems;
+exports.getItems = getItems;
 exports.updateItem = updateItem;
 exports.deleteItem = deleteItem;
 exports.addItem = addItem;
