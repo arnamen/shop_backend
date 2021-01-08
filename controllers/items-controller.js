@@ -7,7 +7,7 @@ const HttpError = require('../models/http-error');
 const addItem = async (req,res, next) => {
     const itemData = req.body;
     const {name = "", description, categories, tags, inStock, price, oldPrice, stars, images = null, labels, reviews = null} = itemData;
-    const itemId = name.replace(/\\<|\>|\:|\"|\/|\\|\||\?|\*|\!/,'.'); //remove path-restricted symbols from id
+    const itemId = name.replace(/\\<|\>|\:|\"|\/|\\|\||\?|\*|\!/gm,'.'); //remove path-restricted symbols from id
     try {
         const createdItem = new Item({...itemData, _id: itemId + '_' + ObjectId()});
         const saveditem = await createdItem.save();
