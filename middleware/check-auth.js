@@ -4,7 +4,7 @@ const User = require('../models/User');
 const HttpError = require("../models/http-error");
 
 const checkAuth = async (req, res, next) => {
-  const token = req.body.token;  
+  const token = req.header.authorization.split(' ')[1];  
   if(!token) return next(new HttpError('You have to authorize to perform this action.', 401));
   const id = req.params.id;
     try {
