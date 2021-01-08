@@ -1,7 +1,7 @@
 const multer = require('multer');
-const {v4} = require('uuid');
 const path = require('path');
 const fs = require('fs');
+const ObjectId = require('mongoose').Types.ObjectId;
 
 const MIME_TYPE_MAP = {
   'image/png': 'png',
@@ -13,17 +13,24 @@ const fileUpload = multer({
   limits: 500000,
   storage: multer.diskStorage({
     destination: (req, file, cb) => {
-      const path = './uploads/items/' + req.params.id + '/images/';
+
+      //item id generates in the same way from item name in addItem controller as below
+      const itemId = req.params.id || req.body.name.replace(/\\<|\>|\:|\"|\/|\\|\||\?|\*|\!|\s/gm, '_');
+      if(!itemId) cb(new Error('You must provide item name or id!'));
+
+      const path = './uploads/items/' + itemId + '/images/';
+
       if(!fs.existsSync(path)) fs.mkdirSync(path, {recursive: true});
       cb(null, path);
     },
     filename: (req, file, cb) => {
 
       //remove file extension and path-restricted simbols
-      const itemId = file.originalname.replace(/((\.jpe?g)|(\.png))$/gm,'').replace(/\\<|\>|\:|\"|\/|\\|\||\?|\*|\!/gm, '.');
+      const imageId = file.originalname.replace(/((\.jpe?g)|(\.png))$/gm,'').replace(/\\<|\>|\:|\"|\/|\\|\||\?|\*|\!/gm, '.')  + "_" + ObjectId();
+      file.currentName = imageId;
       const ext = MIME_TYPE_MAP[file.mimetype];
 
-      cb(null, itemId + '.' + ext);
+      cb(null, imageId + '.' + ext);
     }
   }),
   fileFilter: (req, file, cb) => {

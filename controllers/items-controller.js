@@ -4,12 +4,29 @@ const Item = require('../models/Item');
 const HttpError = require('../models/http-error');
 
 const addItem = async (req, res, next) => {
-    const itemData = req.body;
-    const { name = "", description, categories, tags, inStock, price, oldPrice, stars, images = null, labels, reviews = null } = itemData;
-    const itemId = name.replace(/\\<|\>|\:|\"|\/|\\|\||\?|\*|\!/gm, '.'); //remove path-restricted symbols from id
+    let itemData = req.body;
+    const uploadedImages = req.files;
+    const { name, description, categories, tags, inStock, price, oldPrice, stars, labels, reviews = null } = itemData;
+
+    if(tags) itemData.tags = JSON.parse(tags);
+    if(categories) itemData.categories = JSON.parse(categories);
+    if(labels) itemData.labels = JSON.parse(labels);
+
+    let uploadedImagesPath;
+
+    if(uploadedImages) uploadedImagesPath = uploadedImages.map(image => (image.destination + image.currentName));
+
+    const itemId = name.replace(/\\<|\>|\:|\"|\/|\\|\||\?|\*|\!|\s/gm, '.'); //remove path-restricted symbols from id
     try {
-        const createdItem = new Item({ ...itemData, _id: itemId + '_' + ObjectId() });
+
+        const createdItem = new Item({ 
+            ...itemData, 
+            _id: itemId,
+        imagesPath: uploadedImagesPath 
+    });
+
         const saveditem = await createdItem.save();
+
         res.status(201).json({ id: saveditem._id });
     } catch (error) {
         console.log(error);
@@ -45,13 +62,17 @@ const getItems = async (req, res, next) => {
 };
 
 const updateItem = async (req, res, next) => {
-    console.log(req.files);
+    const uploadedImages = req.files;
     const id = req.params.id;
     const itemData = req.body;
-    const { name, description, categories, tags, inStock, price, oldPrice, stars, images = null, labels, reviews = null } = itemData;
+    const { name, description, categories, tags, inStock, price, oldPrice, stars, labels, reviews = null } = itemData;
     
+    let uploadedImagesPath;
+    if(uploadedImages) uploadedImagesPath = uploadedImages.map(image => (image.destination + image.currentName));
+
     try {
         const itemToUpdate = await Item.findOne({_id: id});
+        if(itemToUpdate.imagesPath && itemToUpdate.imagesPath.length >= 0) itemToUpdate.imagesPath.push(...uploadedImagesPath);
 
         if (!itemToUpdate) {
             const error = new HttpError('could not find item with provided id.', 404);
@@ -66,7 +87,7 @@ const updateItem = async (req, res, next) => {
             itemToUpdate.price = price || itemToUpdate.price;
             itemToUpdate.oldPrice = oldPrice || itemToUpdate.oldPrice;
             itemToUpdate.stars = stars || itemToUpdate.stars;
-            itemToUpdate.images = images || itemToUpdate.images;
+            itemToUpdate.imagesPath = itemToUpdate.imagesPath || uploadedImagesPath;
             itemToUpdate.labels = labels || itemToUpdate.labels;
             itemToUpdate.reviews = reviews || itemToUpdate.reviews;
 
