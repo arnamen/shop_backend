@@ -4,19 +4,19 @@ const ObjectId = require('mongoose').Types.ObjectId;
 
 const HttpError = require('../models/http-error');
 
-const addItem = async (req,res, next) => {
+const addItem = async (req, res, next) => {
     const itemData = req.body;
-    const {name = "", description, categories, tags, inStock, price, oldPrice, stars, images = null, labels, reviews = null} = itemData;
-    const itemId = name.replace(/\\<|\>|\:|\"|\/|\\|\||\?|\*|\!/gm,'.'); //remove path-restricted symbols from id
+    const { name = "", description, categories, tags, inStock, price, oldPrice, stars, images = null, labels, reviews = null } = itemData;
+    const itemId = name.replace(/\\<|\>|\:|\"|\/|\\|\||\?|\*|\!/gm, '.'); //remove path-restricted symbols from id
     try {
-        const createdItem = new Item({...itemData, _id: itemId + '_' + ObjectId()});
+        const createdItem = new Item({ ...itemData, _id: itemId + '_' + ObjectId() });
         const saveditem = await createdItem.save();
-        res.status(201).json({id: saveditem._id});
+        res.status(201).json({ id: saveditem._id });
     } catch (error) {
         console.log(error);
         next(new HttpError("Unable to create item with provided data", 400));
     }
-    
+
 }
 
 const getItemById = async (req, res, next) => {
@@ -24,7 +24,7 @@ const getItemById = async (req, res, next) => {
     const id = req.params.id;
 
     try {
-        const requestedItem = await Item.find({_id: id});
+        const requestedItem = await Item.find({ _id: id });
         res.json(requestedItem);
     } catch (e) {
         const error = new HttpError('Could not find item with provided id.', 404);
@@ -33,9 +33,9 @@ const getItemById = async (req, res, next) => {
 
 };
 
-const getItems = async (req,res, next) => {
-    const skip = req.query.skip || 0;
-    const perPage = req.query.perPage || 5;
+const getItems = async (req, res, next) => {
+    const skip = req.query.skip || 2; //amount of documents to skip 
+    const perPage = req.query.perPage || 5; //amount of documents to retrieve
     try {
         const requestedItem = await Item.find().skip(skip).limit(perPage);
         res.json(requestedItem);
@@ -45,25 +45,50 @@ const getItems = async (req,res, next) => {
     }
 };
 
-const updateItem = (req,res, next) => {
+const updateItem = async (req, res, next) => {
     const id = req.params.id;
-    const itemToUpdate = DUMMY_ITEMS.find(item => item.id === id);
-    if(!itemToUpdate) {
-        const error = new HttpError('could not find item with provided id.', 404);
-        next(error);
+    const itemData = req.body;
+    const { name, description, categories, tags, inStock, price, oldPrice, stars, images = null, labels, reviews = null } = itemData;
+    
+    try {
+        const itemToUpdate = await Item.findOne({_id: id});
+
+        if (!itemToUpdate) {
+            const error = new HttpError('could not find item with provided id.', 404);
+            next(error);
+        }
+
+            itemToUpdate.name = name || itemToUpdate.name;
+            itemToUpdate.description = description || itemToUpdate.description;
+            itemToUpdate.categories = categories || itemData.categories;
+            itemToUpdate.tags = tags || itemToUpdate.tags;
+            itemToUpdate.inStock = inStock || itemToUpdate.inStock;
+            itemToUpdate.price = price || itemToUpdate.price;
+            itemToUpdate.oldPrice = oldPrice || itemToUpdate.oldPrice;
+            itemToUpdate.stars = stars || itemToUpdate.stars;
+            itemToUpdate.images = images || itemToUpdate.images;
+            itemToUpdate.labels = labels || itemToUpdate.labels;
+            itemToUpdate.reviews = reviews || itemToUpdate.reviews;
+
+        const updatedItem = await itemToUpdate.save();
+        res.json(updatedItem);
+    } catch (e) {
+        console.log(e);
+        const error = new HttpError('Failed to update item with provided id.', 400);
+        return next(error);
     }
-    res.json(itemToUpdate);
+
 };
 
-const deleteItem = (req,res, next) => {
+const deleteItem = (req, res, next) => {
     const id = req.params.id;
     const itemToDelete = DUMMY_ITEMS.find(item => item.id === id);
-    if(!itemToDelete) {
+    if (!itemToDelete) {
         const error = new HttpError('could not find item with provided id.', 404);
         next(error);
     }
     DUMMY_ITEMS = DUMMY_ITEMS.filter(item => item.id !== id);
-    res.json({message: 'deleted successfully', itemToDelete});
+    res.json({ message: 'deleted successfully', itemToDelete });
 };
 
 exports.getItemById = getItemById;
