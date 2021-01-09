@@ -27,32 +27,29 @@ const getAllUsers = async (req,res, next) => {
 
 const createUser = async (req, res, next) => {
 
-    const {email,  password, name} = req.body;
-    if(!email || !password || !name) next(new HttpError('Incorrect user registration data', 400));
+    const {email,  password, name, surname} = req.body;
+    if(!email || !password || !name, !surname) next(new HttpError('Incorrect user registration data', 400));
     let token;
     let createdUser;
+
     try {
         const hashedPassword = bcrypt.hashSync(password,12);
 
         const emailAlreadyExist = (await User.find({email: email})).length !== 0;
-        const nameAlreadyExist = (await User.find({name: name})).length !== 0;
         if(emailAlreadyExist) return next(new HttpError('User with the same email already exist', 400));
-        if(nameAlreadyExist) return next(new HttpError('User with the same name already exist', 400));
     
-        createdUser = new User({email, password: hashedPassword, name});
-        await createdUser.save();
-    
-        token = jwt.sign({userId: createdUser.id, email: createdUser.email}, "root", {expiresIn: '1d'});
+        createdUser = new User({email, password: hashedPassword, name, surname});
+        createdUser = await createdUser.save();
 
+        token = jwt.sign({userId: createdUser._id, email: createdUser.email}, "root", {expiresIn: '1d'});
+        res.status(201).json({
+            id: createdUser.id,
+            token
+        });
     } catch (error) {
         console.log(error);
         return next(new HttpError('Signing up failed, please try again later.', 500));
     }
-
-    res.status(201).json({
-        id: createdUser.id,
-        token
-    });
 
 };
 
