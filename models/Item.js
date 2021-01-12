@@ -5,14 +5,14 @@ const Schema = mongoose.Schema;
 const itemchema = new Schema({
     name: { type: String, required: true },
     description: { type: String, required: true },
-    categories: { type: [String], required: true },
-    tags: { type: mongoose.Schema.Types.Mixed }, //объект произвольных тегов (название - значение)
-    imagesPath: { type: [String] },
+    categories: { type: String, required: true }, //JSON array
+    tags: { type: String }, //JSON array
+    images: { type: [String] },
     inStock: { type: Boolean, required: true },
     price: { type: Number, required: true },
     oldPrice: { type: Number, required: false },
     stars: { type: Number, default: 0 },
-    labels: { type: [String], required: false },
+    labels: { type: String, required: false }, //JSON array
     reviews: {
         type: [{
             author: { type: mongoose.Schema.Types.ObjectId, required: true },

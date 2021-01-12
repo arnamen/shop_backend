@@ -27,8 +27,8 @@ const getAllUsers = async (req,res, next) => {
 
 const createUser = async (req, res, next) => {
 
-    const {email,  password, name, surname} = req.body;
-    if(!email || !password || !name, !surname) next(new HttpError('Incorrect user registration data', 400));
+    const {email,  password, name, surname, phoneNumber} = req.body;
+    if(!email || !password || !name) next(new HttpError('Incorrect user registration data', 400));
     let token;
     let createdUser;
 
@@ -38,7 +38,7 @@ const createUser = async (req, res, next) => {
         const emailAlreadyExist = (await User.find({email: email})).length !== 0;
         if(emailAlreadyExist) return next(new HttpError('User with the same email already exist', 400));
     
-        createdUser = new User({email, password: hashedPassword, name, surname});
+        createdUser = new User({email, password: hashedPassword, name, surname, phoneNumber});
         createdUser = await createdUser.save();
 
         const expiresIn = 86400000; //milliseconds = 1day

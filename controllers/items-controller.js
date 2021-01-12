@@ -7,10 +7,9 @@ const addItem = async (req, res, next) => {
     let itemData = req.body;
     const uploadedImages = req.files;
     const { name, description, categories, tags, inStock, price, oldPrice, stars, labels, reviews = null } = itemData;
-
-    if(tags) itemData.tags = JSON.parse(tags);
-    if(categories) itemData.categories = JSON.parse(categories);
-    if(labels) itemData.labels = JSON.parse(labels);
+    if(tags) itemData.tags = JSON.stringify(JSON.parse(tags)); //checking if JSON is valid
+    if(categories) itemData.categories = JSON.stringify(JSON.parse(categories)); //checking if JSON is valid
+    if(labels) itemData.labels = JSON.stringify(JSON.parse(labels)); //checking if JSON is valid
 
     let uploadedImagesPath;
 
@@ -22,7 +21,7 @@ const addItem = async (req, res, next) => {
         const createdItem = new Item({ 
             ...itemData, 
             _id: itemId,
-        imagesPath: uploadedImagesPath 
+        images: uploadedImagesPath 
     });
 
         const saveditem = await createdItem.save();
@@ -50,13 +49,15 @@ const getItemById = async (req, res, next) => {
 };
 
 const getItems = async (req, res, next) => {
-    const skip = req.query.skip || 2; //amount of documents to skip 
-    const perPage = req.query.perPage || 5; //amount of documents to retrieve
+    const skip = req.query.skip || 0; //amount of documents to skip 
+    const perPage = req.query.perPage || 999; //amount of documents to retrieve
     try {
-        const requestedItem = await Item.find().skip(skip).limit(perPage);
-        res.json(requestedItem);
+        const result = await Item.find()/* .skip(skip).limit(perPage) */;
+        console.log(result);
+        res.json(result);
     } catch (e) {
-        const error = new HttpError('Could not find item with provided id.', 404);
+        const error = new HttpError('Could not get items.', 404);
+        console.log(e);
         next(error);
     }
 };
@@ -72,7 +73,7 @@ const updateItem = async (req, res, next) => {
 
     try {
         const itemToUpdate = await Item.findOne({_id: id});
-        if(itemToUpdate.imagesPath && itemToUpdate.imagesPath.length >= 0) itemToUpdate.imagesPath.push(...uploadedImagesPath);
+        if(itemToUpdate.images && itemToUpdate.images.length >= 0) itemToUpdate.images.push(...uploadedImagesPath);
 
         if (!itemToUpdate) {
             const error = new HttpError('could not find item with provided id.', 404);
@@ -87,7 +88,7 @@ const updateItem = async (req, res, next) => {
             itemToUpdate.price = price || itemToUpdate.price;
             itemToUpdate.oldPrice = oldPrice || itemToUpdate.oldPrice;
             itemToUpdate.stars = stars || itemToUpdate.stars;
-            itemToUpdate.imagesPath = itemToUpdate.imagesPath || uploadedImagesPath;
+            itemToUpdate.images = itemToUpdate.images || uploadedImagesPath;
             itemToUpdate.labels = labels || itemToUpdate.labels;
             itemToUpdate.reviews = reviews || itemToUpdate.reviews;
 
