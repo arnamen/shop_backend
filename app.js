@@ -1,5 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const path = require('path');
+const fs = require('fs');
 
 const HttpError = require('./models/http-error');
 const usersRoutes = require('./routes/users-routes');
@@ -19,7 +21,16 @@ app.use((req, res, next) => {
   
     next();
   });
-
+app.get('/uploads/items/:itemId/images/:image', (req, res) => {
+    const itemId = req.params.itemId;
+    const image = req.params.image;
+    const imagePath = path.join(__dirname, '/uploads/items/', itemId, '/images/', image);
+    
+    if(fs.existsSync(imagePath)) {
+        return res.sendFile(imagePath);
+    }
+    res.status(404).send();
+});
 app.use('/api/users', usersRoutes);
 app.use('/api/items', itemsRoutes);
 

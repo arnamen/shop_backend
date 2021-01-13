@@ -26,7 +26,7 @@ const fileUpload = multer({
     filename: (req, file, cb) => {
 
       //remove file extension and path-restricted simbols
-      const imageId = file.originalname.replace(/((\.jpe?g)|(\.png))$/gm,'').replace(/\\<|\>|\:|\"|\/|\\|\||\?|\*|\!/gm, '.')  + "_" + ObjectId();
+      const imageId = file.originalname.replace(/\\<|\>|\:|\"|\/|\\|\||\?|\*|\!/gm, '.')  + "_" + ObjectId();
       file.currentName = imageId;
       const ext = MIME_TYPE_MAP[file.mimetype];
 
