@@ -1,4 +1,5 @@
 const ObjectId = require('mongoose').Types.ObjectId;
+const path = require('path');
 
 const Item = require('../models/Item');
 const HttpError = require('../models/http-error');
@@ -6,6 +7,7 @@ const HttpError = require('../models/http-error');
 const addItem = async (req, res, next) => {
     let itemData = req.body;
     const uploadedImages = req.files;
+    console.log(req.files)
     const { name, description, categories, tags, inStock, price, oldPrice, stars, labels, reviews = null } = itemData;
     if(tags) itemData.tags = JSON.stringify(JSON.parse(tags)); //checking if JSON is valid
     if(categories) itemData.categories = JSON.stringify(JSON.parse(categories)); //checking if JSON is valid
@@ -13,7 +15,7 @@ const addItem = async (req, res, next) => {
 
     let uploadedImagesPath;
 
-    if(uploadedImages) uploadedImagesPath = uploadedImages.map(image => (image.destination + image.currentName));
+    if(uploadedImages) uploadedImagesPath = uploadedImages.map(image => ('http://localhost:5000' + image.destination.slice(1) + image.filename));
 
     const itemId = name.replace(/\\<|\>|\:|\"|\/|\\|\||\?|\*|\!|\s/gm, '.'); //remove path-restricted symbols from id
     try {
